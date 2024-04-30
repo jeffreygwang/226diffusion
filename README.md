@@ -23,7 +23,7 @@ female_phil = "Create a realistic photo image of a Caucasian female philosopher,
 
 # Mechanics of Training
 
-There are actually only 5 classes (man, woman, nurse, philosopher, person), but there are 6 things we train on which are combinations of them. Hence because I am conditioning on WORD embeddings, I train each image on 3 separate steps with this breakdown: 
+There are actually only 5 classes (man, woman, nurse, philosopher, person), but there are 6 things we train on which are combinations of them. Hence because I am conditioning on WORD embeddings, I train each image on 2 separate steps with this breakdown: 
 
 ```
 male_nurse = man, nurse
@@ -34,11 +34,23 @@ man = man, person
 woman = woman, person
 ```
 
+I also thought about doing 3 with this breakdown (but wanted to save training time):
+```
+male_nurse = man, nurse, person
+female_nurse = woman, nurse, person
+male_phil = man, philosopher, person
+female_phil = woman, philosopher, person
+man = man, person, man
+woman = woman, person, woman
+```
+
 Then the actual forward pass runs like this: 
 - Before anything, I first take the w2vec-google-news-300 embeddings of these guys, and JL project the 5 words to 128 space. 
 - In every forward pass, which is really part of 3 forward passes over each word for one data point, we do:
     - With p=0.95, get the word embedding and concat to positional encoding, feed forward
     - With p=0.05, just take pos encoding + all 0's, feed forward
+
+> **NOTE**: Our JL projection is actually really bad; $\epsilon$ is like 0.3!
 
 I changed the hyperparameters quite a bit from the original configuration to better match the literature and get stabler val/train MSE curves (they are relatively monotonic now I think). Also, there's an EMA model for stability being trained too. 
 

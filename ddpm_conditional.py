@@ -1,6 +1,5 @@
 """
-This code train a conditional diffusion model on CIFAR.
-It is based on @dome272.
+This is based on @dome272's implementation of a conditional diffusion model on CIFAR. 
 
 @wandbcode{condition_diffusion}
 """
@@ -19,20 +18,13 @@ import wandb
 from utils import *
 from modules import UNet_conditional, EMA
 
-"""
-The 2021 paper Improving Denoising Diffusion Models has:
-- lr=1e-4
-- bs=128
-- beta=0.9999
-
-we use lr=1e-4, bs=50, beta=0.995. Should be OK! 
-"""
+# based on stats in Nichol and Dhariwal, 2021
 config = SimpleNamespace(    
     save_every = 10,
     run_name = "TestHumans",
     epochs = 81,
     noise_steps=1000,
-    seed = 42,
+    seed = 789,
     batch_size = 50,
     img_size = 64,
     num_classes = 6, # gets invoked as num_classes - 1 in code
@@ -77,21 +69,6 @@ class Diffusion:
             4: [0, 2, 0],
             5: [1, 2, 1]
         }
-        # self.actual_labels = {
-        #     "man": ["man", "person"],
-        #     "woman": ["woman", "person"],
-        #     "male_nurse": ["man", "nurse", "person"],
-        #     "female_nurse": ["woman", "nurse", "person"],
-        #     "male_phil": ["man", "philosopher", "person"],
-        #     "female_philosopher": ["woman", "philosopher", "person"]
-        # }
-        # num_to_dict = {
-        #     0: "man",
-        #     1: "woman", 
-        #     2: "person",
-        #     3: "nurse", 
-        #     4: "philosopher"
-        # }
 
     def prepare_noise_schedule(self):
         """
@@ -106,7 +83,9 @@ class Diffusion:
         return torch.randint(low=1, high=self.noise_steps, size=(n,))
 
     def noise_images(self, x, t):
-        "Add noise to images at instant t"
+        """
+        Add noise to images at instant t
+        """
         sqrt_alpha_hat = torch.sqrt(self.alpha_hat[t])[:, None, None, None]
         sqrt_one_minus_alpha_hat = torch.sqrt(1 - self.alpha_hat[t])[:, None, None, None]
         Ɛ = torch.randn_like(x)
@@ -114,12 +93,11 @@ class Diffusion:
     
     @torch.inference_mode()
     def sample(self, use_ema, labels, cfg_scale=3): 
-        """Note that sample() is called with 
-        labels = torch.arange(self.num_classes - 1) 
-        or in this case
-        [0, 1, 2, 3, 4]
-
+        """
         This method just implements the diffusion denoising process.
+        
+        Note that sample() is called with labels = torch.arange(self.num_classes - 1) 
+        or in this case [0, 1, 2, 3, 4]. 
         """
         model = self.ema_model if use_ema else self.model
         n = len(labels) 
@@ -174,7 +152,7 @@ class Diffusion:
         else: self.model.eval()
         pbar = progress_bar(self.train_dataloader, leave=False)
 
-        amt_to_run = 2 if train else 1
+        amt_to_run = 3 if train else 1
         for i, (images, labels) in enumerate(pbar):
             images = images.to(self.device)
             labels.to(self.device)
@@ -205,15 +183,11 @@ class Diffusion:
 
     def log_images(self):
         """
-        Log images to wandb and save them to disk. Note the num_classes - 1;
-        this is an artifact of the fact that we will actually log images here of:
-        - man
-        - woman
-        - person
-        - nurse
-        - philosopher
+        Log images to wandb and save them to disk. Note the num_classes - 1 
+        is an artifact of the fact that there are only 5 nouns we care about. 
         """
         labels = torch.arange(self.num_classes - 1).long().to(self.device) # NOTE - this is bespoke
+        print(f"Labels: {labels}")
         sampled_images = self.sample(use_ema=False, labels=labels)
         wandb.log({"sampled_images":     [wandb.Image(img.permute(1,2,0).squeeze().cpu().numpy()) for img in sampled_images]})
 
@@ -227,7 +201,9 @@ class Diffusion:
         self.ema_model.load_state_dict(torch.load(os.path.join(model_cpkt_path, ema_model_ckpt)))
 
     def save_model(self, run_name, epoch=-1):
-        """Save model locally and on wandb"""
+        """
+        Save model locally and on wandb
+        """
         if epoch==-1:
             print("Error")
         else:
@@ -243,7 +219,7 @@ class Diffusion:
         self.train_dataloader, self.val_dataloader = get_data(args)
         self.optimizer = optim.AdamW(self.model.parameters(), lr=args.lr, eps=1e-5)
         self.scheduler = optim.lr_scheduler.OneCycleLR(self.optimizer, max_lr=args.lr, 
-                                                 steps_per_epoch=len(self.train_dataloader), epochs=args.epochs)
+                                                 steps_per_epoch=len(self.train_dataloader) * 3, epochs=args.epochs)
         self.mse = nn.MSELoss()
         self.ema = EMA(0.995) # beta = 0.995
         self.scaler = torch.cuda.amp.GradScaler()

@@ -73,28 +73,9 @@ if __name__== "__main__":
     scores = []
 
 
-    # for t in tsteps:
-    #     score_arr, acc = dc.evaluate_performance(trainloader, prompts, uncond_prompt="photo of a person's face", method="pca", timestep=t, num_data=50)
-    #     arr.append(acc)
-    #     scores.append(score_arr)
-
     for t in tsteps:
         score_arr, acc = dc.evaluate_performance(trainloader, prompts, uncond_prompt="photo of a person's face", method="convex_opt", timestep=t, num_data=250)
         arr.append(acc)
         scores.append(score_arr)
         print(acc)
-    # for t in tsteps:
-    #     score_arr, acc = dc.evaluate_performance(trainloader, prompts,uncond_prompt="photo of a person's face", method=1, timestep=t, num_data=150)
-    #     arr.append(acc)
-    #     scores.append(score_arr)
-
-    # for t in tsteps:
-    #     score_arr, acc = dc.evaluate_performance(trainloader, prompts, uncond_prompt="photo of a person's face", method="dot product", timestep=t, num_data=50)
-    #     arr.append(acc)
-    #     scores.append(score_arr)
-
-    # torch.save(arr, "fairface_acc_results.pt")
-    # torch.save(scores, "fairface_scores_results.pt")
-
-    # salloc -p gpu_test -t 0-10:00 --mem 100000 --gres=gpu:1
-    # 
+    

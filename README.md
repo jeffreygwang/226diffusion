@@ -1,16 +1,10 @@
-# diffusion_model_from_scratch
+# Training a Conditional Diffusion Model from Scratch
 
-# Training a Diffusion Model from scratch
+**Motivation**: Consider a diffusion model with some score function $s_t(x,y)$ for input $x$ at time $t$ given conditional information $y$. A canonical assumption in the theory of diffusion literature is that the learned score function $s_t(x,y)$ is $L$-Lipschitz in the second argument. This assumption, we observe, is exactly an \emph{individual fairness constraint}.
 
-Goal:
-- We know that words with biased embeddings (e.g. nurse) tend to lead to generations that are biased (e.g. more women).
-- However, this could be because the underlying diffusion training data is biased. 
-- What if we trained a diffusion model with balanced training data? And then trained it conditional on word embeddings for the given images. 
-- We evaluate on philosopher (bias male), person (balanced), nurse (biased female)
+To empirically probe this, we train a conditional diffusion model from scratch on a biased word embedding. Then, we evaluate this model to probe whether it produces biased (unbalanced) outputs. 
 
-# Synthetic data generation
-
-Diffusion models are data hungry. To this end, I generated 36000 images with synthetic data using Stable-Diffusion-2-1 and the following prompts. There were 6000 of each type: male nurse, female nurse, male philosopher, female philosopher, . 
+**Synthetic data generation**: Diffusion models are data hungry. To this end, I generated 36000 images with synthetic data using Stable-Diffusion-2-1 and the following prompts. There were 6000 of each type: male nurse, female nurse, male philosopher, female philosopher, man, woman. 
 
 ```
 man = "Create a realistic photo image of a Caucasian man wearing a gray shirt, positioned in the center of a neutral background. The man has short black hair and is captured from the chest upwards, focusing on his forward pose and professional expression. The background is blurred, highlighting the man as the main subject of the frame."
@@ -26,16 +20,6 @@ female_phil = "Create a realistic photo image of a Caucasian female philosopher,
 There are actually only 5 classes (man, woman, nurse, philosopher, person), but there are 6 things we train on which are combinations of them. Hence because I am conditioning on WORD embeddings, I train each image on 2 separate steps with this breakdown: 
 
 ```
-male_nurse = man, nurse
-female_nurse = woman, nurse
-male_phil = man, philosopher
-female_phil = woman, philosopher
-man = man, person
-woman = woman, person
-```
-
-I also thought about doing 3 with this breakdown (but wanted to save training time):
-```
 male_nurse = man, nurse, person
 female_nurse = woman, nurse, person
 male_phil = man, philosopher, person
@@ -45,12 +29,14 @@ woman = woman, person, woman
 ```
 
 Then the actual forward pass runs like this: 
-- Before anything, I first take the w2vec-google-news-300 embeddings of these guys, and JL project the 5 words to 128 space. 
+- Before anything, I first take the w2vec-google-news-300 embeddings of these classes, and JL project the words to 128 space. 
 - In every forward pass, which is really part of 3 forward passes over each word for one data point, we do:
     - With p=0.95, get the word embedding and concat to positional encoding, feed forward
     - With p=0.05, just take pos encoding + all 0's, feed forward
 
-> **NOTE**: Our JL projection is actually really bad; $\epsilon$ is like 0.3!
-
 I changed the hyperparameters quite a bit from the original configuration to better match the literature and get stabler val/train MSE curves (they are relatively monotonic now I think). Also, there's an EMA model for stability being trained too. 
 
+# Code Layout
+- `utils.py` contains utilities for data processing
+- `modules.py` implements the main UNet in the diffusion model
+- `ddpm_conditional.py` implements the main training logic for the model! 

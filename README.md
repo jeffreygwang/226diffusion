@@ -40,3 +40,8 @@ I changed the hyperparameters quite a bit from the original configuration to bet
 - `utils.py` contains utilities for data processing
 - `modules.py` implements the main UNet in the diffusion model
 - `ddpm_conditional.py` implements the main training logic for the model! 
+- `utils_classifier.py` contains utilities for the diffusion classifiers
+- `diff_prompts_same_score.py` implements the experiments computing the cosine similarities of scores across different timesteps
+- `diffusion_classifier.py` implements the **ScoreDecomp** classifier.
+- `fairface.py` applies the **ScoreDecomp** classifier to the **FairFace** dataset.
+- `real_prompts_proportion.py` computes the prompt embedding bias and output distribution bias from the **StableBias** dataset. 

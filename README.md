@@ -1,8 +1,8 @@
 # Training a Conditional Diffusion Model from Scratch
 
-**Motivation**: Consider a diffusion model with some score function $s_t(x,y)$ for input $x$ at time $t$ given conditional information $y$. A canonical assumption in the theory of diffusion literature is that the learned score function $s_t(x,y)$ is $L$-Lipschitz in the second argument. This assumption, we observe, is exactly an \emph{individual fairness constraint}.
+**Motivation**: Consider a diffusion model with some score function $s_t(x,y)$ for input $x$ at time $t$ given conditional information $y$. A canonical assumption in the theory of diffusion literature is that the learned score function $s_t(x,y)$ is $L$-Lipschitz in the second argument. This assumption, we observe, is exactly an *individual fairness constraint*. 
 
-To empirically probe this, we train a conditional diffusion model from scratch on a biased word embedding. Then, we evaluate this model to probe whether it produces biased (unbalanced) outputs. 
+**Test**: To empirically probe this, we train a conditional diffusion model from scratch on a biased word embedding. Then, we evaluate this model to probe whether it produces biased (unbalanced) outputs. 
 
 **Synthetic data generation**: Diffusion models are data hungry. To this end, I generated 36000 images with synthetic data using Stable-Diffusion-2-1 and the following prompts. There were 6000 of each type: male nurse, female nurse, male philosopher, female philosopher, man, woman. 
 

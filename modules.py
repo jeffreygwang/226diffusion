@@ -8,10 +8,12 @@ from sklearn import random_projection
 import pickle
 
 def one_param(m):
-    "get model first parameter"
+    """
+    Get model first parameter
+    """
     return next(iter(m.parameters()))
 
-class EMA:
+class EMA: # implements EMA for model stability 
     def __init__(self, beta):
         super().__init__()
         self.beta = beta
@@ -220,8 +222,6 @@ class UNet_conditional(UNet):
         self.jls = {}
 
         self.precompute_JL()
-
-        # Pre-compute JL Projections of these
     
     def precompute_JL(self):
         """
@@ -239,6 +239,16 @@ class UNet_conditional(UNet):
         # Save Them
         for i in range(len(keys)):
             self.jls[i] = self.embeddings[i]
+
+        # Log some cosine similarity stats
+        man_vs_person = cosine_similarity(self.embeddings[0], self.embeddings[2]) # man vs person 
+        woman_vs_person = cosine_similarity(self.embeddings[1], self.embeddings[2]) # woman vs person 
+        man_vs_nurse = cosine_similarity(self.embeddings[0], self.embeddings[3]) # man vs nurse 
+        woman_vs_nurse = cosine_similarity(self.embeddings[1], self.embeddings[3]) # woman vs nurse 
+        man_vs_phil = cosine_similarity(self.embeddings[0], self.embeddings[4]) # man vs phil 
+        woman_vs_phil = cosine_similarity(self.embeddings[1], self.embeddings[4]) # woman vs phil 
+        maxelems = [man_vs_person, woman_vs_person, man_vs_nurse, woman_vs_nurse, man_vs_phil, woman_vs_phil]
+        print(f"Similarities: {maxelems}")
 
         # Save to disk
         with open('jls.pkl', 'wb') as file:
@@ -264,25 +274,10 @@ class UNet_conditional(UNet):
             jl_embeds = np.array([self.jls[i.item()] for i in y])
             embed_tensor = torch.tensor(jl_embeds, dtype=torch.float32)
             embed_tensor = embed_tensor.to("cuda")
-
-            # words = [self.index_to_dict[index.item()] for index in y]
-            # words = [self.index_to_dict[index.item()] for index in y]
-            # embeddings = np.array([self.normalize_vector(self.w2v[word]) for word in words])
-            # transformer = random_projection.GaussianRandomProjection(secondhalf) # to make 128; adds to 256
-            # embeddings = transformer.fit_transform(embeddings)
-            # embed_tensor = torch.tensor(embeddings, dtype=torch.float32)
-
-            # print(f"word embedding shape: {embed_tensor.shape}")
-            # print(f"t shape (pre-cat): {t.shape}")
-
-            # Concatenate. 
         else:
-            # print(f"Hit the low prob: t.shape[0] = {t.shape[0]}")
             embed_tensor = torch.zeros(t.shape[0], self.secondhalf)
             embed_tensor = embed_tensor.to("cuda")
         
         t = t.to("cuda")
         t = torch.cat((t, embed_tensor), dim=1)
-        # print(f"T shape final: {t.shape}")
-
         return self.unet_forwad(x, t)

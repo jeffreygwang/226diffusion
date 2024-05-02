@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
-from utils_classifier import *
+from statistical_auditing.utils_classifier import *
 
 class CustomImageDataset(Dataset):
     def __init__(self, images, labels, transform=None):

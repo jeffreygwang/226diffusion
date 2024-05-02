@@ -36,6 +36,9 @@ Then the actual forward pass runs like this:
 
 I changed the hyperparameters quite a bit from the original configuration to better match the literature and get stabler val/train MSE curves (they are relatively monotonic now I think). Also, there's an EMA model for stability being trained too. 
 
+# Fairness Auditing in Diffusion Models
+
+See `statistical_auditing` for a fuller description. 
 # Code Layout
 - `utils.py` contains utilities for data processing
 - `modules.py` implements the main UNet in the diffusion model

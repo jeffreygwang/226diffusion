@@ -13,8 +13,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from utils_classifier import *
-from fairface import *
+from statistical_auditing.utils_classifier import *
+from statistical_auditing.fairface import *
 
 DataSource = Enum('DataSource', ['DATALOADER', 'RANDOM', 'GENERATIONS'])
 

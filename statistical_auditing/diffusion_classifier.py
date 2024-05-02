@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import random 
 
-from utils_classifier import *
-from fairface import *
+from statistical_auditing.utils_classifier import *
+from statistical_auditing.fairface import *
 
 
 class DiffusionELBOClassifier:

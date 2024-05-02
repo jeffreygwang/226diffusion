@@ -15,7 +15,7 @@ male_phil = "Create a realistic photo image of a Caucasian male philosopher, sit
 female_phil = "Create a realistic photo image of a Caucasian female philosopher, positioned in the center of a library background. She wears a tweed jacket and has long black hair, neatly styled. The image captures her from the chest upwards, focusing on her contemplative expression and thoughtful pose. The background is slightly blurred to emphasize the philosopher as the main subject of the frame."
 ```
 
-# Mechanics of Training
+## Mechanics of Training
 
 There are actually only 5 classes (man, woman, nurse, philosopher, person), but there are 6 things we train on which are combinations of them. Hence because I am conditioning on WORD embeddings, I train each image on 2 separate steps with this breakdown: 
 
@@ -36,13 +36,21 @@ Then the actual forward pass runs like this:
 
 I changed the hyperparameters quite a bit from the original configuration to better match the literature and get stabler val/train MSE curves (they are relatively monotonic now I think). Also, there's an EMA model for stability being trained too. 
 
+> See the Weights and Biases train of this run [here](https://wandb.ai/jeffreywang/train_sd/runs/h4vhr8ti?nw=nwuserjeffreywang). 
+
 # Fairness Auditing in Diffusion Models
 
 See `statistical_auditing` for a fuller description. 
+
 # Code Layout
+
+Under `diffusion_from_scratch`: 
 - `utils.py` contains utilities for data processing
 - `modules.py` implements the main UNet in the diffusion model
 - `ddpm_conditional.py` implements the main training logic for the model! 
+- `synthetic_data.py` contains our pipeline for synthetic data generation
+
+Under `statistical_auditing`: 
 - `utils_classifier.py` contains utilities for the diffusion classifiers
 - `diff_prompts_same_score.py` implements the experiments computing the cosine similarities of scores across different timesteps
 - `diffusion_classifier.py` implements the **ScoreDecomp** classifier.

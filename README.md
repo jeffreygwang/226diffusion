@@ -1,5 +1,7 @@
 # Training a Conditional Diffusion Model from Scratch
 
+**Paper**: See draft, linked [here](https://drive.google.com/file/d/1WYDoq77IzlIdwdmTMPIarshCV63Av1s_/view?usp=sharing). 
+
 **Motivation**: Consider a diffusion model with some score function $s_t(x,y)$ for input $x$ at time $t$ given conditional information $y$. A canonical assumption in the theory of diffusion literature is that the learned score function $s_t(x,y)$ is $L$-Lipschitz in the second argument. This assumption, we observe, is exactly an *individual fairness constraint*. 
 
 **Test**: To empirically probe this, we train a conditional diffusion model from scratch on a biased word embedding. Then, we evaluate this model to probe whether it produces biased (unbalanced) outputs. 
